@@ -1,0 +1,16 @@
+interface:
+  display_name: "Spec Forge Journeys"
+  short_description: "Refine each flow in progressive review batches"
+  default_prompt: "Use $spec-forge-journeys only in Plan Mode to refine the user journeys and step-by-step workflow YAML in small review batches. Confirm chat language and file language first, keep files in English by default, and summarize each journey in chat for approval."
+policy:
+  allow_implicit_invocation: false
+extensions:
+  ux_contract:
+    family: "spec-forge"
+    skill: "spec-forge-journeys"
+    stage: "journeys"
+    contract_path: "../../spec-forge/assets/contracts/ux-contracts.yaml"
+    contract_id: "spec-forge-journeys"
+    collection_mode: "guided_step_by_step"
+    interactive_collection: "plan_mode_only"
+    choice_presentation: "dialog_when_available"

@@ -1,0 +1,16 @@
+interface:
+  display_name: "Spec Forge Implement"
+  short_description: "Implement the approved spec and record implementation results"
+  default_prompt: "Use $spec-forge-implement only in Plan Mode to execute the approved spec and update the implementation report with completion status, validations, and blockers. Confirm chat language and file language first, keep files in English by default, and report implementation progress through chat summaries instead of asking the user to inspect files."
+policy:
+  allow_implicit_invocation: false
+extensions:
+  ux_contract:
+    family: "spec-forge"
+    skill: "spec-forge-implement"
+    stage: "implement"
+    contract_path: "../../spec-forge/assets/contracts/ux-contracts.yaml"
+    contract_id: "spec-forge-implement"
+    collection_mode: "guided_step_by_step"
+    interactive_collection: "plan_mode_only"
+    choice_presentation: "dialog_when_available"

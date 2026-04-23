@@ -1,0 +1,33 @@
+from_stage: "router"
+to_stage: "intake"
+reason: ""
+blocking_items: []
+required_inputs: []
+recommended_script: ""
+recommended_command: ""
+next_interaction:
+  type: "ready"
+  reason: ""
+next_prompt: ""
+next_choice_dialog: {}
+mode_requirement:
+  interactive_collection: "plan_mode_only"
+  plan_mode_required_if_interactive: true
+ux:
+  skill: "spec-forge"
+  stage: "router"
+  contract_path: ""
+  contract_version: 1
+  mode:
+    id: "initialize_new_spec"
+    label: "Initialize New Spec"
+    description: ""
+  collection:
+    mode: "guided_step_by_step"
+    interactive_collection: "plan_mode_only"
+    choice_presentation: "dialog_when_available"
+    fallback_collection: "inline_short_questions"
+  resolved_parameters: {}
+  missing_parameters: []
+  choices: []
+  resolved_at: ""

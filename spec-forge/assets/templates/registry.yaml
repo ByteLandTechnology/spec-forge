@@ -1,0 +1,8 @@
+family: "spec-forge"
+version: 1
+collection:
+  root: ".spec-forge"
+  target_path: ""
+  created_at: ""
+active_spec_id: ""
+specs: []

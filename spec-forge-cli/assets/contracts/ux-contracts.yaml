@@ -1,0 +1,667 @@
+family: "spec-forge"
+version: 1
+defaults:
+  collection:
+    mode: "guided_step_by_step"
+    interactive_collection: "plan_mode_only"
+    choice_presentation: "dialog_when_available"
+    fallback_collection: "inline_short_questions"
+  execution:
+    runtime_mode: "plan_mode_only"
+    approval_style: "chat_summary_confirmation"
+    file_review_policy: "assistant_summarizes_in_chat"
+skills:
+  spec-forge:
+    family: "spec-forge"
+    version: 1
+    skill: "spec-forge"
+    stage: "router"
+    default_mode: "auto"
+    execution:
+      runtime_mode: "plan_mode_only"
+      approval_style: "chat_summary_confirmation"
+      file_review_policy: "assistant_summarizes_in_chat"
+    collection:
+      mode: "guided_step_by_step"
+      interactive_collection: "plan_mode_only"
+      choice_presentation: "dialog_when_available"
+      fallback_collection: "inline_short_questions"
+      max_questions_per_turn: 2
+    modes:
+      initialize_new_spec:
+        label: "Initialize New Spec"
+        description: "Confirm languages, then collect the minimum information needed to create a new spec workspace."
+        required_parameters:
+          - "chat_language"
+          - "file_language"
+          - "target_dir"
+          - "spec_id"
+          - "request_title"
+      resume_existing_spec:
+        label: "Resume Existing Spec"
+        description: "Confirm languages, then resolve the active or selected spec and route to the current incomplete stage."
+        required_parameters:
+          - "chat_language"
+          - "file_language"
+          - "target_dir"
+    parameters:
+      - id: "chat_language"
+        label: "Chat Language"
+        description: "Language the assistant should use in chat with the user."
+        type: "string"
+        prompt: "Which language should we use in chat? If you have no preference, I will keep the current conversation language."
+        resolve:
+          - "invocation.parameters.chat_language"
+      - id: "file_language"
+        label: "File Language"
+        description: "Language used when the workflow writes prompts, specs, or other file artifacts."
+        type: "string"
+        prompt: "Which language should we use for file artifacts? If you have no preference, I will use English."
+        resolve:
+          - "invocation.parameters.file_language"
+      - id: "target_dir"
+        label: "Target Project Directory"
+        description: "Project root that contains or should contain the shared .spec-forge collection."
+        type: "path"
+        prompt: "Which project directory should contain the .spec-forge workspace?"
+        resolve:
+          - "workspace.target_dir"
+      - id: "spec_id"
+        label: "Spec ID"
+        description: "Stable identifier for the refinement thread. This can come from the current workspace, an explicit choice, or a new slug."
+        type: "slug"
+        prompt: "What stable spec id should we use for this refinement thread?"
+        resolve:
+          - "workspace.spec_id"
+          - "request.spec_id"
+          - "invocation.parameters.spec_id"
+      - id: "request_title"
+        label: "Request Title"
+        description: "Short title used to identify a new spec and generate a default slug when needed."
+        type: "string"
+        prompt: "What short title should identify this spec?"
+        resolve:
+          - "request.title"
+          - "invocation.parameters.request_title"
+      - id: "request_summary"
+        label: "Request Summary"
+        description: "Short summary of the user request that stays attached to the spec workspace."
+        type: "string"
+        prompt: "What one-line summary best captures the request?"
+        resolve:
+          - "request.summary"
+          - "invocation.parameters.request_summary"
+    choices:
+      - id: "spec_selection_mode"
+        type: "single"
+        title: "Choose Spec Action"
+        presentation: "dialog_when_available"
+        show_when: "multiple_existing_specs_and_spec_missing"
+        show_in_modes:
+          - "initialize_new_spec"
+        before_missing_parameters: true
+        interaction_priority: 10
+        prompt: "Choose whether to resume an existing spec or initialize a new one."
+        options:
+          - id: "resume_existing_spec"
+            label: "Resume existing"
+            description: "Use the active or explicitly selected spec workspace."
+          - id: "initialize_new_spec"
+            label: "Initialize new"
+            description: "Create a new spec workspace before routing."
+      - id: "existing_spec_id"
+        type: "single"
+        title: "Choose Existing Spec"
+        presentation: "dialog_when_available"
+        show_when: "multiple_existing_specs_and_spec_missing"
+        show_in_modes:
+          - "resume_existing_spec"
+        answers_parameter: "spec_id"
+        interaction_priority: 20
+        prompt: "Choose a previously created spec when resuming work."
+        options_from: "registry.specs"
+  spec-forge-intake:
+    family: "spec-forge"
+    version: 1
+    skill: "spec-forge-intake"
+    stage: "intake"
+    default_mode: "guided_intake"
+    execution:
+      runtime_mode: "plan_mode_only"
+      approval_style: "chat_summary_confirmation"
+      file_review_policy: "assistant_summarizes_in_chat"
+    collection:
+      mode: "guided_step_by_step"
+      interactive_collection: "plan_mode_only"
+      choice_presentation: "dialog_when_available"
+      fallback_collection: "inline_short_questions"
+      max_questions_per_turn: 3
+    modes:
+      guided_intake:
+        label: "Guided Intake"
+        description: "Confirm languages, then collect framing details one cluster at a time and record them into YAML."
+        required_parameters:
+          - "chat_language"
+          - "file_language"
+          - "target_dir"
+          - "spec_id"
+          - "problem_statement"
+          - "problem_goal"
+          - "primary_users"
+          - "in_scope"
+    parameters:
+      - id: "chat_language"
+        label: "Chat Language"
+        description: "Language the assistant should use in chat with the user."
+        type: "string"
+        prompt: "Which language should we use in chat? If you have no preference, I will keep the current conversation language."
+        resolve:
+          - "invocation.parameters.chat_language"
+      - id: "file_language"
+        label: "File Language"
+        description: "Language used when the workflow writes prompts, specs, or other file artifacts."
+        type: "string"
+        prompt: "Which language should we use for file artifacts? If you have no preference, I will use English."
+        resolve:
+          - "invocation.parameters.file_language"
+      - id: "target_dir"
+        label: "Target Project Directory"
+        description: "Project root that owns the multi-spec collection."
+        type: "path"
+        prompt: "Which project directory owns this spec workspace?"
+        resolve:
+          - "workspace.target_dir"
+      - id: "spec_id"
+        label: "Spec ID"
+        description: "Target spec to refine during intake."
+        type: "slug"
+        prompt: "Which spec id are we refining?"
+        resolve:
+          - "workspace.spec_id"
+      - id: "problem_statement"
+        label: "Problem Statement"
+        description: "Concise framing of the user problem or opportunity."
+        type: "string"
+        prompt: "What problem statement should we capture?"
+        resolve:
+          - "artifacts.request_context.problem.statement"
+      - id: "problem_goal"
+        label: "Problem Goal"
+        description: "Desired outcome the refined spec should achieve."
+        type: "string"
+        prompt: "What outcome or goal should this spec achieve?"
+        resolve:
+          - "artifacts.request_context.problem.goal"
+      - id: "primary_users"
+        label: "Primary Users"
+        description: "People, roles, or systems primarily served by the requested change."
+        type: "string_list"
+        prompt: "Who are the primary users for this request?"
+        resolve:
+          - "artifacts.request_context.actors.primary_users"
+      - id: "in_scope"
+        label: "In-Scope Items"
+        description: "The features, flows, or boundaries explicitly included in the spec."
+        type: "string_list"
+        prompt: "Which items are explicitly in scope?"
+        resolve:
+          - "artifacts.request_context.scope.in_scope"
+      - id: "request_summary"
+        label: "Request Summary"
+        description: "Short summary the workspace keeps for routing and review."
+        type: "string"
+        prompt: "What short request summary should the workspace keep?"
+        resolve:
+          - "request.summary"
+          - "artifacts.request_context.problem.statement"
+    choices:
+      - id: "existing_spec_id"
+        type: "single"
+        title: "Choose Spec"
+        presentation: "dialog_when_available"
+        show_when: "multiple_existing_specs_and_spec_missing"
+        answers_parameter: "spec_id"
+        interaction_priority: 10
+        prompt: "Choose which spec intake should continue."
+        options_from: "registry.specs"
+      - id: "active_roles"
+        type: "multi"
+        title: "Choose Intake Review Roles"
+        presentation: "dialog_when_available"
+        interaction_priority: 30
+        prompt: "Choose the active review roles for intake."
+        options:
+          - id: "product-manager"
+            label: "Product Manager"
+            description: "Goal, scope, and value lens."
+          - id: "ux-architect"
+            label: "UX Architect"
+            description: "Flow, states, and interaction lens."
+          - id: "tech-lead"
+            label: "Tech Lead"
+            description: "Feasibility, boundaries, and risk lens."
+          - id: "qa-lead"
+            label: "QA Lead"
+            description: "Acceptance and edge-case lens."
+          - id: "security-reviewer"
+            label: "Security Reviewer"
+            description: "Security and abuse-case lens."
+          - id: "data-engineer"
+            label: "Data Engineer"
+            description: "Data ownership and pipeline lens."
+          - id: "sre-operator"
+            label: "SRE Operator"
+            description: "Operational readiness lens."
+  spec-forge-architecture:
+    family: "spec-forge"
+    version: 1
+    skill: "spec-forge-architecture"
+    stage: "architecture"
+    default_mode: "guided_architecture"
+    execution:
+      runtime_mode: "plan_mode_only"
+      approval_style: "chat_summary_confirmation"
+      file_review_policy: "assistant_summarizes_in_chat"
+    collection:
+      mode: "guided_step_by_step"
+      interactive_collection: "plan_mode_only"
+      choice_presentation: "dialog_when_available"
+      fallback_collection: "inline_short_questions"
+      max_questions_per_turn: 3
+    modes:
+      guided_architecture:
+        label: "Guided Architecture"
+        description: "Confirm languages, then lock the top-level solution shape and decomposition in review-sized steps."
+        required_parameters:
+          - "chat_language"
+          - "file_language"
+          - "target_dir"
+          - "spec_id"
+          - "solution_summary"
+    parameters:
+      - id: "chat_language"
+        label: "Chat Language"
+        description: "Language the assistant should use in chat with the user."
+        type: "string"
+        prompt: "Which language should we use in chat? If you have no preference, I will keep the current conversation language."
+        resolve:
+          - "invocation.parameters.chat_language"
+      - id: "file_language"
+        label: "File Language"
+        description: "Language used when the workflow writes prompts, specs, or other file artifacts."
+        type: "string"
+        prompt: "Which language should we use for file artifacts? If you have no preference, I will use English."
+        resolve:
+          - "invocation.parameters.file_language"
+      - id: "target_dir"
+        label: "Target Project Directory"
+        description: "Project root that owns the multi-spec collection."
+        type: "path"
+        prompt: "Which project directory owns this spec workspace?"
+        resolve:
+          - "workspace.target_dir"
+      - id: "spec_id"
+        label: "Spec ID"
+        description: "Target spec to refine during architecture."
+        type: "slug"
+        prompt: "Which spec id are we refining?"
+        resolve:
+          - "workspace.spec_id"
+      - id: "solution_summary"
+        label: "Solution Summary"
+        description: "Top-level summary of the overall solution approach and boundaries."
+        type: "string"
+        prompt: "What is the best concise summary of the solution approach?"
+        resolve:
+          - "artifacts.solution_outline.solution.summary"
+      - id: "journey_index"
+        label: "Journey Index"
+        description: "Structured list of top-level journeys that the solution must support."
+        type: "yaml_list"
+        prompt: "Which top-level journeys should be indexed?"
+        resolve:
+          - "artifacts.journey_index.items"
+      - id: "component_index"
+        label: "Component Index"
+        description: "Structured list of top-level components and responsibilities."
+        type: "yaml_list"
+        prompt: "Which top-level components should be indexed?"
+        resolve:
+          - "artifacts.component_index.items"
+    choices:
+      - id: "existing_spec_id"
+        type: "single"
+        title: "Choose Spec"
+        presentation: "dialog_when_available"
+        show_when: "multiple_existing_specs_and_spec_missing"
+        answers_parameter: "spec_id"
+        interaction_priority: 10
+        prompt: "Choose which spec architecture should continue."
+        options_from: "registry.specs"
+      - id: "review_cluster"
+        type: "single"
+        title: "Choose Architecture Review Cluster"
+        presentation: "dialog_when_available"
+        interaction_priority: 30
+        prompt: "Choose the next architecture review cluster."
+        options:
+          - id: "solution-shape"
+            label: "Solution shape"
+            description: "Overall approach, outcomes, and boundaries."
+          - id: "journey-index"
+            label: "Journey index"
+            description: "Top-level journeys and their priorities."
+          - id: "component-index"
+            label: "Component index"
+            description: "Top-level components and boundaries."
+  spec-forge-journeys:
+    family: "spec-forge"
+    version: 1
+    skill: "spec-forge-journeys"
+    stage: "journeys"
+    default_mode: "guided_journeys"
+    execution:
+      runtime_mode: "plan_mode_only"
+      approval_style: "chat_summary_confirmation"
+      file_review_policy: "assistant_summarizes_in_chat"
+    collection:
+      mode: "guided_step_by_step"
+      interactive_collection: "plan_mode_only"
+      choice_presentation: "dialog_when_available"
+      fallback_collection: "inline_short_questions"
+      max_questions_per_turn: 3
+      max_items_per_batch: 1
+    modes:
+      guided_journeys:
+        label: "Guided Journey Review"
+        description: "Confirm languages, then refine one review-sized journey batch at a time."
+        required_parameters:
+          - "chat_language"
+          - "file_language"
+          - "target_dir"
+          - "spec_id"
+          - "selected_focus_ids"
+    parameters:
+      - id: "chat_language"
+        label: "Chat Language"
+        description: "Language the assistant should use in chat with the user."
+        type: "string"
+        prompt: "Which language should we use in chat? If you have no preference, I will keep the current conversation language."
+        resolve:
+          - "invocation.parameters.chat_language"
+      - id: "file_language"
+        label: "File Language"
+        description: "Language used when the workflow writes prompts, specs, or other file artifacts."
+        type: "string"
+        prompt: "Which language should we use for file artifacts? If you have no preference, I will use English."
+        resolve:
+          - "invocation.parameters.file_language"
+      - id: "target_dir"
+        label: "Target Project Directory"
+        description: "Project root that owns the multi-spec collection."
+        type: "path"
+        prompt: "Which project directory owns this spec workspace?"
+        resolve:
+          - "workspace.target_dir"
+      - id: "spec_id"
+        label: "Spec ID"
+        description: "Target spec to refine during journeys."
+        type: "slug"
+        prompt: "Which spec id are we refining?"
+        resolve:
+          - "workspace.spec_id"
+      - id: "selected_focus_ids"
+        label: "Selected Journey IDs"
+        description: "Review-sized journey ids chosen for the current discussion batch."
+        type: "slug_list"
+        prompt: "Which journey ids should be reviewed in this batch?"
+        resolve:
+          - "pipeline.focus.ids"
+    choices:
+      - id: "existing_spec_id"
+        type: "single"
+        title: "Choose Spec"
+        presentation: "dialog_when_available"
+        show_when: "multiple_existing_specs_and_spec_missing"
+        answers_parameter: "spec_id"
+        interaction_priority: 10
+        prompt: "Choose which spec journeys should continue."
+        options_from: "registry.specs"
+      - id: "journey_focus"
+        type: "single"
+        title: "Choose Journey Focus"
+        presentation: "dialog_when_available"
+        show_when: "multiple_focus_ids"
+        interaction_priority: 20
+        prompt: "Choose the next journey to review."
+        options_from: "pipeline.focus.ids"
+  spec-forge-components:
+    family: "spec-forge"
+    version: 1
+    skill: "spec-forge-components"
+    stage: "components"
+    default_mode: "guided_components"
+    execution:
+      runtime_mode: "plan_mode_only"
+      approval_style: "chat_summary_confirmation"
+      file_review_policy: "assistant_summarizes_in_chat"
+    collection:
+      mode: "guided_step_by_step"
+      interactive_collection: "plan_mode_only"
+      choice_presentation: "dialog_when_available"
+      fallback_collection: "inline_short_questions"
+      max_questions_per_turn: 3
+      max_items_per_batch: 1
+    modes:
+      guided_components:
+        label: "Guided Component Review"
+        description: "Confirm languages, then refine one review-sized component batch at a time."
+        required_parameters:
+          - "chat_language"
+          - "file_language"
+          - "target_dir"
+          - "spec_id"
+          - "selected_focus_ids"
+    parameters:
+      - id: "chat_language"
+        label: "Chat Language"
+        description: "Language the assistant should use in chat with the user."
+        type: "string"
+        prompt: "Which language should we use in chat? If you have no preference, I will keep the current conversation language."
+        resolve:
+          - "invocation.parameters.chat_language"
+      - id: "file_language"
+        label: "File Language"
+        description: "Language used when the workflow writes prompts, specs, or other file artifacts."
+        type: "string"
+        prompt: "Which language should we use for file artifacts? If you have no preference, I will use English."
+        resolve:
+          - "invocation.parameters.file_language"
+      - id: "target_dir"
+        label: "Target Project Directory"
+        description: "Project root that owns the multi-spec collection."
+        type: "path"
+        prompt: "Which project directory owns this spec workspace?"
+        resolve:
+          - "workspace.target_dir"
+      - id: "spec_id"
+        label: "Spec ID"
+        description: "Target spec to refine during components."
+        type: "slug"
+        prompt: "Which spec id are we refining?"
+        resolve:
+          - "workspace.spec_id"
+      - id: "selected_focus_ids"
+        label: "Selected Component IDs"
+        description: "Review-sized component ids chosen for the current discussion batch."
+        type: "slug_list"
+        prompt: "Which component ids should be reviewed in this batch?"
+        resolve:
+          - "pipeline.focus.ids"
+    choices:
+      - id: "existing_spec_id"
+        type: "single"
+        title: "Choose Spec"
+        presentation: "dialog_when_available"
+        show_when: "multiple_existing_specs_and_spec_missing"
+        answers_parameter: "spec_id"
+        interaction_priority: 10
+        prompt: "Choose which spec components should continue."
+        options_from: "registry.specs"
+      - id: "component_focus"
+        type: "single"
+        title: "Choose Component Focus"
+        presentation: "dialog_when_available"
+        show_when: "multiple_focus_ids"
+        interaction_priority: 20
+        prompt: "Choose the next component to review."
+        options_from: "pipeline.focus.ids"
+  spec-forge-readiness:
+    family: "spec-forge"
+    version: 1
+    skill: "spec-forge-readiness"
+    stage: "readiness"
+    default_mode: "guided_readiness"
+    execution:
+      runtime_mode: "plan_mode_only"
+      approval_style: "chat_summary_confirmation"
+      file_review_policy: "assistant_summarizes_in_chat"
+    collection:
+      mode: "guided_step_by_step"
+      interactive_collection: "plan_mode_only"
+      choice_presentation: "dialog_when_available"
+      fallback_collection: "inline_short_questions"
+      max_questions_per_turn: 2
+    modes:
+      guided_readiness:
+        label: "Guided Readiness Review"
+        description: "Confirm languages, then close remaining blockers and confirm the final implementation contract."
+        required_parameters:
+          - "chat_language"
+          - "file_language"
+          - "target_dir"
+          - "spec_id"
+          - "implementation_ready"
+    parameters:
+      - id: "chat_language"
+        label: "Chat Language"
+        description: "Language the assistant should use in chat with the user."
+        type: "string"
+        prompt: "Which language should we use in chat? If you have no preference, I will keep the current conversation language."
+        resolve:
+          - "invocation.parameters.chat_language"
+      - id: "file_language"
+        label: "File Language"
+        description: "Language used when the workflow writes prompts, specs, or other file artifacts."
+        type: "string"
+        prompt: "Which language should we use for file artifacts? If you have no preference, I will use English."
+        resolve:
+          - "invocation.parameters.file_language"
+      - id: "target_dir"
+        label: "Target Project Directory"
+        description: "Project root that owns the multi-spec collection."
+        type: "path"
+        prompt: "Which project directory owns this spec workspace?"
+        resolve:
+          - "workspace.target_dir"
+      - id: "spec_id"
+        label: "Spec ID"
+        description: "Target spec to validate during readiness."
+        type: "slug"
+        prompt: "Which spec id are we refining?"
+        resolve:
+          - "workspace.spec_id"
+      - id: "implementation_ready"
+        label: "Implementation Ready"
+        description: "Explicit user confirmation that the spec is sufficiently complete for implementation."
+        type: "boolean"
+        prompt: "Has the user explicitly confirmed in chat that the spec is implementation-ready?"
+        resolve:
+          - "artifacts.implementation_spec.implementation_gate.ready"
+    choices:
+      - id: "existing_spec_id"
+        type: "single"
+        title: "Choose Spec"
+        presentation: "dialog_when_available"
+        show_when: "multiple_existing_specs_and_spec_missing"
+        answers_parameter: "spec_id"
+        interaction_priority: 10
+        prompt: "Choose which spec readiness should validate."
+        options_from: "registry.specs"
+      - id: "readiness_decision"
+        type: "single"
+        title: "Choose Readiness Decision"
+        presentation: "dialog_when_available"
+        interaction_priority: 30
+        prompt: "Choose whether to mark the spec ready or keep resolving blockers."
+        options:
+          - id: "ready"
+            label: "Mark ready"
+            description: "All blockers are closed and the user approves readiness in chat."
+          - id: "needs-more-work"
+            label: "Needs more work"
+            description: "Keep blockers explicit and continue refining."
+  spec-forge-implement:
+    family: "spec-forge"
+    version: 1
+    skill: "spec-forge-implement"
+    stage: "implement"
+    default_mode: "guided_implement"
+    execution:
+      runtime_mode: "plan_mode_only"
+      approval_style: "chat_summary_confirmation"
+      file_review_policy: "assistant_summarizes_in_chat"
+    collection:
+      mode: "guided_step_by_step"
+      interactive_collection: "plan_mode_only"
+      choice_presentation: "dialog_when_available"
+      fallback_collection: "inline_short_questions"
+      max_questions_per_turn: 2
+    modes:
+      guided_implement:
+        label: "Guided Implementation"
+        description: "Confirm languages, then execute the approved implementation plan and record completion status plus validations."
+        required_parameters:
+          - "chat_language"
+          - "file_language"
+          - "target_dir"
+          - "spec_id"
+    parameters:
+      - id: "chat_language"
+        label: "Chat Language"
+        description: "Language the assistant should use in chat with the user."
+        type: "string"
+        prompt: "Which language should we use in chat? If you have no preference, I will keep the current conversation language."
+        resolve:
+          - "invocation.parameters.chat_language"
+      - id: "file_language"
+        label: "File Language"
+        description: "Language used when the workflow writes prompts, specs, or other file artifacts."
+        type: "string"
+        prompt: "Which language should we use for file artifacts? If you have no preference, I will use English."
+        resolve:
+          - "invocation.parameters.file_language"
+      - id: "target_dir"
+        label: "Target Project Directory"
+        description: "Project root that owns the multi-spec collection."
+        type: "path"
+        prompt: "Which project directory owns this spec workspace?"
+        resolve:
+          - "workspace.target_dir"
+      - id: "spec_id"
+        label: "Spec ID"
+        description: "Target spec to implement."
+        type: "slug"
+        prompt: "Which spec id are we implementing?"
+        resolve:
+          - "workspace.spec_id"
+    choices:
+      - id: "existing_spec_id"
+        type: "single"
+        title: "Choose Spec"
+        presentation: "dialog_when_available"
+        show_when: "multiple_existing_specs_and_spec_missing"
+        answers_parameter: "spec_id"
+        interaction_priority: 10
+        prompt: "Choose which spec implementation should continue."
+        options_from: "registry.specs"

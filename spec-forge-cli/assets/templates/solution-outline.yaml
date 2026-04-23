@@ -1,0 +1,36 @@
+stage: "architecture"
+status: "draft"
+solution:
+  summary: ""
+  user_outcome: ""
+  system_outcome: ""
+  alternatives_considered: []
+boundaries:
+  owned: []
+  external_dependencies: []
+  non_goals: []
+cross_cutting_concerns:
+  performance: []
+  security: []
+  accessibility: []
+  observability: []
+discussion_roles:
+  active: []
+role_reviews:
+  product-manager:
+    status: "pending"
+    concerns: []
+  ux-architect:
+    status: "pending"
+    concerns: []
+  tech-lead:
+    status: "pending"
+    concerns: []
+  qa-lead:
+    status: "pending"
+    concerns: []
+open_questions: []
+approval:
+  status: "pending"
+  confirmed_by_user: false
+  confirmation_note: ""

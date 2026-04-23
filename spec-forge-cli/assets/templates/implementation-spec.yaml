@@ -1,0 +1,32 @@
+stage: "readiness"
+status: "draft"
+summary:
+  objective: ""
+  scope: []
+  non_goals: []
+functional_contract:
+  journeys: []
+  components: []
+code_contract:
+  interfaces: []
+  data_models: []
+  invariants: []
+cross_cutting_concerns:
+  performance: []
+  security: []
+  accessibility: []
+  observability: []
+delivery_plan:
+  feature_flags: []
+  migrations: []
+  rollout_notes: []
+acceptance_criteria: []
+deferred_items: []
+unresolved_items: []
+implementation_gate:
+  ready: false
+  blockers: []
+approval:
+  status: "pending"
+  confirmed_by_user: false
+  confirmation_note: ""

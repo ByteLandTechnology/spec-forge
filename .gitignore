@@ -1,0 +1,12 @@
+spec-forge-cli/target/
+spec-forge-cli/dist/
+spec-forge-cli/node_modules/
+spec-forge-cli/npm/platforms/*
+!spec-forge-cli/npm/platforms/.gitkeep
+.spec-forge/
+**/__pycache__/
+*.pyc
+.DS_Store
+*.log
+*.tmp
+.cli-forge

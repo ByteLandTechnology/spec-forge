@@ -1,0 +1,16 @@
+interface:
+  display_name: "Spec Forge Architecture"
+  short_description: "Lock the overall solution shape before drilling down"
+  default_prompt: "Use $spec-forge-architecture only in Plan Mode to turn the approved framing into a top-level solution and decomposition YAML. Confirm chat language and file language first, keep files in English by default, and summarize architecture decisions in chat instead of sending the user to files."
+policy:
+  allow_implicit_invocation: false
+extensions:
+  ux_contract:
+    family: "spec-forge"
+    skill: "spec-forge-architecture"
+    stage: "architecture"
+    contract_path: "../../spec-forge/assets/contracts/ux-contracts.yaml"
+    contract_id: "spec-forge-architecture"
+    collection_mode: "guided_step_by_step"
+    interactive_collection: "plan_mode_only"
+    choice_presentation: "dialog_when_available"

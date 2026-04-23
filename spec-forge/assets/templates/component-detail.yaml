@@ -1,0 +1,39 @@
+stage: "components"
+status: "draft"
+discussion_roles: []
+component:
+  id: ""
+  title: ""
+  kind: ""
+  purpose: ""
+  responsibilities: []
+  non_responsibilities: []
+interfaces:
+  inputs: []
+  outputs: []
+  events: []
+state_model:
+  source_of_truth: ""
+  persisted_fields: []
+  derived_fields: []
+dependencies: []
+behavior:
+  algorithms: []
+  validation_rules: []
+  error_handling: []
+  concurrency: []
+quality_attributes:
+  performance: []
+  security: []
+  accessibility: []
+  observability: []
+delivery:
+  feature_flags: []
+  migrations: []
+  testing: []
+journey_links: []
+open_questions: []
+approval:
+  status: "pending"
+  confirmed_by_user: false
+  confirmation_note: ""

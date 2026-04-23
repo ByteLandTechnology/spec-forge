@@ -1,0 +1,16 @@
+interface:
+  display_name: "Spec Forge Intake"
+  short_description: "Frame the problem, scope, actors, and constraints"
+  default_prompt: "Use $spec-forge-intake only in Plan Mode to create the initial YAML framing artifacts. Confirm chat language and file language first, keep files in English by default, summarize intake decisions in chat, and never require the user to review files directly."
+policy:
+  allow_implicit_invocation: false
+extensions:
+  ux_contract:
+    family: "spec-forge"
+    skill: "spec-forge-intake"
+    stage: "intake"
+    contract_path: "../../spec-forge/assets/contracts/ux-contracts.yaml"
+    contract_id: "spec-forge-intake"
+    collection_mode: "guided_step_by_step"
+    interactive_collection: "plan_mode_only"
+    choice_presentation: "dialog_when_available"

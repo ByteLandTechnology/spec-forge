@@ -1,0 +1,6 @@
+.cli-forge/
+dist/
+node_modules/
+target/
+npm/platforms/*
+!npm/platforms/.gitkeep

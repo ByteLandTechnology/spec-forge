@@ -1,0 +1,29 @@
+stage: "intake"
+status: "draft"
+problem:
+  statement: ""
+  goal: ""
+  success_signals: []
+scope:
+  in_scope: []
+  out_of_scope: []
+actors:
+  primary_users: []
+  secondary_users: []
+  reviewers: []
+constraints:
+  product: []
+  technical: []
+  delivery: []
+assumptions: []
+open_questions: []
+discussion_policy:
+  max_questions_per_turn: 3
+  review_style: "broad_to_fine"
+  input_collection: "guided_step_by_step"
+  interactive_collection: "plan_mode_only"
+  choice_presentation: "dialog_when_available"
+approval:
+  status: "pending"
+  confirmed_by_user: false
+  confirmation_note: ""

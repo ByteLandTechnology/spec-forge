@@ -1,0 +1,110 @@
+execution:
+  interactive_mode: "plan_only"
+  switch_to_plan_if_needed: false
+  fallback_when_plan_unavailable: "stop_and_request_plan_mode"
+  plan_required_reasons:
+    - "skill_family_is_plan_only"
+    - "missing_required_parameters"
+    - "interactive_choice_required"
+
+invocation:
+  skill_name: "spec-forge-intake"
+  skill_path: "./"
+  display_parameters_in_agent: true
+  collect_missing_parameters_step_by_step: true
+  use_choice_dialogs_when_available: true
+  summarize_stage_content_in_chat: true
+  require_language_handshake: true
+
+parameters:
+  - id: "chat_language"
+    label: "Chat Language"
+    description: "Language used for the assistant's chat replies."
+    type: "string"
+    required: true
+    collection_step: 1
+    collect_via: "text"
+    prompt: "Which language should we use in chat? If you have no preference, I will keep the current conversation language."
+  - id: "file_language"
+    label: "File Language"
+    description: "Language used for file artifacts written by the workflow."
+    type: "string"
+    required: true
+    collection_step: 2
+    collect_via: "text"
+    prompt: "Which language should we use for file artifacts? If you have no preference, I will use English."
+  - id: "target_dir"
+    label: "Target Project Directory"
+    description: "Project root that contains the .spec-forge collection."
+    type: "path"
+    required: true
+    collection_step: 3
+    collect_via: "text"
+    prompt: "Which project directory contains the spec collection?"
+  - id: "spec_id"
+    label: "Spec ID"
+    description: "Target spec to refine during intake."
+    type: "slug"
+    required: "conditional"
+    condition: "required_when_not_inferable_from_path_or_when_multiple_specs_exist"
+    collection_step: 4
+    collect_via: "choice_or_text"
+    prompt: "Which spec should we run intake on?"
+  - id: "problem_statement"
+    label: "Problem Statement"
+    description: "Concise framing of the user problem or opportunity."
+    type: "string"
+    required: true
+    collection_step: 5
+    collect_via: "text"
+    prompt: "What problem statement should we capture?"
+  - id: "problem_goal"
+    label: "Problem Goal"
+    description: "Desired outcome the refined spec should achieve."
+    type: "string"
+    required: true
+    collection_step: 6
+    collect_via: "text"
+    prompt: "What outcome or goal should this spec achieve?"
+  - id: "primary_users"
+    label: "Primary Users"
+    description: "People, roles, or systems primarily served by the request."
+    type: "string_list"
+    required: true
+    collection_step: 7
+    collect_via: "text"
+    prompt: "Who are the primary users for this request?"
+  - id: "in_scope"
+    label: "In-Scope Items"
+    description: "Features, flows, or boundaries explicitly included in the spec."
+    type: "string_list"
+    required: true
+    collection_step: 8
+    collect_via: "text"
+    prompt: "Which items are explicitly in scope?"
+  - id: "request_summary"
+    label: "Request Summary"
+    description: "Short summary stored with the workspace for routing and review."
+    type: "string"
+    required: false
+    collection_step: 9
+    collect_via: "text"
+    prompt: "What short request summary should the workspace keep?"
+
+dialogs:
+  - id: "choose-existing-spec"
+    when: "multiple_existing_specs_and_spec_id_is_missing"
+    kind: "single_select"
+    title: "Choose Spec"
+    question: "Which spec should intake continue?"
+
+approvals:
+  - id: "approve-intake"
+    title: "Confirm Intake Summary In Chat"
+    options:
+      - value: "approve_and_continue"
+        label: "Approve And Continue"
+      - value: "request_changes"
+        label: "Request Changes"
+      - value: "stop_for_now"
+        label: "Stop For Now"

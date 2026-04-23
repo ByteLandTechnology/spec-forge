@@ -1,0 +1,14 @@
+stage: "journeys"
+status: "draft"
+batch_policy:
+  max_items_per_batch: 1
+  max_questions_per_turn: 3
+  input_collection: "guided_step_by_step"
+  interactive_collection: "plan_mode_only"
+  choice_presentation: "dialog_when_available"
+batches: []
+current_batch_id: ""
+approval:
+  status: "pending"
+  confirmed_by_user: false
+  confirmation_note: ""

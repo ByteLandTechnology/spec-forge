@@ -1,0 +1,16 @@
+interface:
+  display_name: "Spec Forge Readiness"
+  short_description: "Check completeness and consolidate final spec YAML"
+  default_prompt: "Use $spec-forge-readiness only in Plan Mode to validate all stage artifacts and produce the final implementation-ready YAML spec. Confirm chat language and file language first, keep files in English by default, and obtain readiness approval from a chat summary rather than file review."
+policy:
+  allow_implicit_invocation: false
+extensions:
+  ux_contract:
+    family: "spec-forge"
+    skill: "spec-forge-readiness"
+    stage: "readiness"
+    contract_path: "../../spec-forge/assets/contracts/ux-contracts.yaml"
+    contract_id: "spec-forge-readiness"
+    collection_mode: "guided_step_by_step"
+    interactive_collection: "plan_mode_only"
+    choice_presentation: "dialog_when_available"

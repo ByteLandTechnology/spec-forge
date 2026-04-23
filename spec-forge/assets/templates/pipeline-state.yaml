@@ -1,0 +1,99 @@
+family: "spec-forge"
+version: 1
+spec:
+  id: ""
+  workspace_path: ""
+workspace:
+  collection_root: ".spec-forge"
+  spec_root: ""
+  target_path: ""
+  created_at: ""
+request:
+  title: ""
+  summary: ""
+phase:
+  current: "intake"
+  next_recommended: "intake"
+  status: "active"
+stages:
+  intake:
+    status: "pending"
+    approved: false
+    artifact_paths:
+      - "framing/request-context.yaml"
+      - "framing/role-map.yaml"
+  architecture:
+    status: "blocked"
+    approved: false
+    artifact_paths:
+      - "architecture/solution-outline.yaml"
+      - "architecture/journey-index.yaml"
+      - "architecture/component-index.yaml"
+  journeys:
+    status: "blocked"
+    approved: false
+    artifact_paths:
+      - "journeys/batches.yaml"
+  components:
+    status: "blocked"
+    approved: false
+    artifact_paths:
+      - "components/batches.yaml"
+  readiness:
+    status: "blocked"
+    approved: false
+    artifact_paths:
+      - "synthesis/implementation-spec.yaml"
+  implement:
+    status: "blocked"
+    approved: false
+    artifact_paths:
+      - "synthesis/implementation-report.yaml"
+focus:
+  kind: "none"
+  ids: []
+  note: ""
+ux:
+  skill: "spec-forge"
+  stage: "router"
+  contract_path: ""
+  contract_version: 1
+  mode:
+    id: "initialize_new_spec"
+    label: "Initialize New Spec"
+    description: ""
+  collection:
+    mode: "guided_step_by_step"
+    interactive_collection: "plan_mode_only"
+    choice_presentation: "dialog_when_available"
+    fallback_collection: "inline_short_questions"
+  resolved_parameters: {}
+  missing_parameters: []
+  choices: []
+  resolved_at: ""
+handoff:
+  from_stage: "router"
+  to_stage: "intake"
+  reason: "Initialize the spec workspace."
+  blocking_items: []
+  required_inputs: []
+  recommended_script: "spec-forge-cli init"
+  recommended_command: "spec-forge-cli init"
+  ux:
+    skill: "spec-forge"
+    stage: "router"
+    contract_path: ""
+    contract_version: 1
+    mode:
+      id: "initialize_new_spec"
+      label: "Initialize New Spec"
+      description: ""
+    collection:
+      mode: "guided_step_by_step"
+      interactive_collection: "plan_mode_only"
+      choice_presentation: "dialog_when_available"
+      fallback_collection: "inline_short_questions"
+    resolved_parameters: {}
+    missing_parameters: []
+    choices: []
+    resolved_at: ""

@@ -1,0 +1,30 @@
+stage: "journeys"
+status: "draft"
+discussion_roles: []
+journey:
+  id: ""
+  title: ""
+  summary: ""
+  actors: []
+  trigger: ""
+  preconditions: []
+  postconditions: []
+main_flow: []
+alternate_flows: []
+states:
+  loading: ""
+  empty: ""
+  error: ""
+  success: ""
+business_rules: []
+edge_cases: []
+linked_components: []
+code_touchpoints:
+  files_or_modules: []
+  public_contracts: []
+observability: []
+open_questions: []
+approval:
+  status: "pending"
+  confirmed_by_user: false
+  confirmation_note: ""

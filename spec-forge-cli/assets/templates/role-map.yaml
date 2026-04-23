@@ -1,0 +1,28 @@
+stage: "intake"
+status: "draft"
+roles:
+  - id: "product-manager"
+    responsibility: "Clarify goals, scope, value, and tradeoffs."
+    enabled: true
+  - id: "ux-architect"
+    responsibility: "Clarify flows, states, and interaction detail."
+    enabled: true
+  - id: "tech-lead"
+    responsibility: "Clarify boundaries, feasibility, and technical risk."
+    enabled: true
+  - id: "qa-lead"
+    responsibility: "Clarify acceptance criteria, edge cases, and testability."
+    enabled: true
+review_sequence:
+  - "product-manager"
+  - "ux-architect"
+  - "tech-lead"
+  - "qa-lead"
+optional_roles:
+  - "security-reviewer"
+  - "data-engineer"
+  - "sre-operator"
+approval:
+  status: "pending"
+  confirmed_by_user: false
+  confirmation_note: ""

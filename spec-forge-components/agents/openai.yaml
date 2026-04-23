@@ -1,0 +1,16 @@
+interface:
+  display_name: "Spec Forge Components"
+  short_description: "Refine component and code-level detail incrementally"
+  default_prompt: "Use $spec-forge-components only in Plan Mode to refine each component and code-detail YAML without overwhelming the user. Confirm chat language and file language first, keep files in English by default, and summarize component decisions in chat instead of requiring file review."
+policy:
+  allow_implicit_invocation: false
+extensions:
+  ux_contract:
+    family: "spec-forge"
+    skill: "spec-forge-components"
+    stage: "components"
+    contract_path: "../../spec-forge/assets/contracts/ux-contracts.yaml"
+    contract_id: "spec-forge-components"
+    collection_mode: "guided_step_by_step"
+    interactive_collection: "plan_mode_only"
+    choice_presentation: "dialog_when_available"

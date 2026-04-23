@@ -1,0 +1,14 @@
+interface:
+  display_name: "Spec Forge"
+  short_description: "Stage-gated YAML spec refinement from broad to code detail"
+  default_prompt: "Use $spec-forge only in Plan Mode. Confirm chat language and file language first, keep file artifacts in English by default, decide details through chat instead of asking the user to inspect files, and record approvals only after the user confirms a chat summary."
+extensions:
+  ux_contract:
+    family: "spec-forge"
+    skill: "spec-forge"
+    stage: "router"
+    contract_path: "../assets/contracts/ux-contracts.yaml"
+    contract_id: "spec-forge"
+    collection_mode: "guided_step_by_step"
+    interactive_collection: "plan_mode_only"
+    choice_presentation: "dialog_when_available"

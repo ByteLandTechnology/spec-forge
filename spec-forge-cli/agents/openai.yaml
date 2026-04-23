@@ -1,0 +1,6 @@
+interface:
+  display_name: "spec-forge-cli"
+  short_description: "Operate and validate the spec-forge CLI"
+  default_prompt: "Use $spec-forge-cli when the task requires operating or validating the package-local `spec-forge-cli` Rust command surface for initializing workspaces, resolving interactions, mutating YAML artifacts, recording approvals, selecting focus batches, checking gates, advancing stages, or validating UX contracts."
+policy:
+  allow_implicit_invocation: false
