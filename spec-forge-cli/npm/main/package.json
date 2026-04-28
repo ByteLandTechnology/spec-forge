@@ -1,6 +1,6 @@
 {
   "name": "@cli-forge-bin/spec-forge-cli",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "Native Rust CLI for the spec-forge YAML workflow",
   "license": "MIT",
   "type": "module",
@@ -23,11 +23,11 @@
     "provenance": true
   },
   "optionalDependencies": {
-    "@cli-forge-bin/spec-forge-cli-darwin-arm64": "1.0.1",
-    "@cli-forge-bin/spec-forge-cli-darwin-x64": "1.0.1",
-    "@cli-forge-bin/spec-forge-cli-linux-arm64": "1.0.1",
-    "@cli-forge-bin/spec-forge-cli-linux-x64": "1.0.1",
-    "@cli-forge-bin/spec-forge-cli-win32-arm64": "1.0.1",
-    "@cli-forge-bin/spec-forge-cli-win32-x64": "1.0.1"
+    "@cli-forge-bin/spec-forge-cli-darwin-arm64": "1.0.0",
+    "@cli-forge-bin/spec-forge-cli-darwin-x64": "1.0.0",
+    "@cli-forge-bin/spec-forge-cli-linux-arm64": "1.0.0",
+    "@cli-forge-bin/spec-forge-cli-linux-x64": "1.0.0",
+    "@cli-forge-bin/spec-forge-cli-win32-arm64": "1.0.0",
+    "@cli-forge-bin/spec-forge-cli-win32-x64": "1.0.0"
   }
 }

@@ -1,3 +1,5 @@
+## 1.0.0 (2026-04-28)
+
 # Changelog
 
 All notable changes to this project are recorded here by `semantic-release`.
