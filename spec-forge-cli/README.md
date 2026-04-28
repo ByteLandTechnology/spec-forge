@@ -1,83 +1,146 @@
 # spec-forge-cli
 
-Native Rust CLI for operating the spec-forge YAML workflow.
+`spec-forge-cli` is the authoritative Rust runtime for the `spec-forge` YAML workflow.
 
-## Common Commands
+Language versions:
 
-```bash
-spec-forge-cli init --target . --request-title "My Spec"
-spec-forge-cli resolve --target . --write --format json
-spec-forge-cli apply --target . --stage intake --parameter problem_goal --value '"Ship the workflow"'
-spec-forge-cli gate check --target . --stage intake --write
-spec-forge-cli stage advance --target . --stage intake
-spec-forge-cli ux validate --target .
-```
+- [English](./README.md)
+- [简体中文](./README.zh-CN.md)
+- [日本語](./README.ja-JP.md)
 
-## Output Formats
+## At A Glance
 
-All structured commands support `--format yaml`, `--format json`, and
-`--format toml`. Human help is available through `--help`; structured help is
-available through `spec-forge-cli help`.
+- Package: `@cli-forge-bin/spec-forge-cli`
+- Source repository: `ByteLandTechnology/spec-forge`
+- Rust edition: `2024`
+- Minimum Rust version: `1.85`
+- Release harness requirements: Node `^22.14.0 || >=24.10.0`, npm `>=10`
 
-## Packaged Assets
+Use this CLI when you need to initialize a workspace, resolve the next interaction, update artifacts, record approvals, check gates, advance stages, or validate the UX contract.
 
-The CLI embeds the workflow templates and UX contract from `assets/` at compile
-time so packaged builds do not depend on files outside the crate.
+## Install
 
-## Release Automation
-
-The npm release harness lives in this directory, while the GitHub Actions
-workflow entrypoint lives at the repository root because this project is stored
-inside a multi-skill repository.
-
-```bash
-npm ci
-npm run release:rehearse
-```
-
-The rehearsal command builds all configured targets, generates the platform npm
-packages, and runs `npm publish --dry-run` without creating tags, GitHub
-Releases, or real npm publications.
-
-Local rehearsal needs the same cross-build tools as CI: `cargo-zigbuild`,
-`zig`, installed Rust targets, and `llvm-mingw` linkers for Windows targets.
-The GitHub workflow installs the Windows linkers automatically through
-`spec-forge-cli/.github/actions/setup-build-env`.
-
-Before the first production CI release, run the one-time bootstrap prepublish:
-
-```bash
-npm run release:prepublish
-```
-
-If local npm authentication is missing, the helper runs `npm login`; open the
-verification URL that npm prints and complete the browser verification before
-continuing. Production releases are driven from `.github/workflows/release.yml`
-on `main` and require npm trusted publishing entries for
-`@cli-forge-bin/spec-forge-cli` plus each
-`@cli-forge-bin/spec-forge-cli-<platform>` platform package.
-
-Users should normally install with:
+### From npm
 
 ```bash
 npm install -g @cli-forge-bin/spec-forge-cli
 ```
 
-For clone-first installs from a released GitHub tag, run:
+The npm package selects a matching native binary for these published targets:
+
+- `darwin-arm64`
+- `darwin-x64`
+- `linux-arm64`
+- `linux-x64`
+- `win32-arm64`
+- `win32-x64`
+
+No postinstall download is required.
+
+### Clone-first fallback
+
+Run this helper from `spec-forge-cli/` inside a checked-out repository clone.
 
 ```bash
 ./scripts/install-current-release.sh
 ```
 
+Use the helper script when you already have the repository checked out and want to install the binary from a released tag without going through the npm registry.
+
+## Quick Start
+
+Run these examples from the repository root so `--target .` points at the repo workspace.
+
+```bash
+spec-forge-cli init --target . --spec-id demo --request-title "Demo Spec"
+spec-forge-cli resolve --target . --spec-id demo --skill spec-forge --stage router --write --format json
+spec-forge-cli ux validate --target .
+spec-forge-cli help gate check --format json
+```
+
+## Command Table
+
+| Command          | Purpose                                                                                |
+| ---------------- | -------------------------------------------------------------------------------------- |
+| `init`           | Create `.spec-forge/`, per-spec YAML skeletons, and initial gate state.                |
+| `resolve`        | Resolve the current workspace state into the next required interaction or ready state. |
+| `apply`          | Persist one accepted parameter answer or choice selection.                             |
+| `focus`          | Select the next journey or component batch to review.                                  |
+| `artifact get`   | Read one artifact from the resolved spec workspace.                                    |
+| `artifact put`   | Replace or create one artifact through the CLI.                                        |
+| `artifact merge` | Patch one artifact incrementally through the CLI.                                      |
+| `approve`        | Record an explicit approval block on an artifact.                                      |
+| `gate check`     | Evaluate a stage gate from persisted YAML state.                                       |
+| `stage advance`  | Promote a stage only after the current gate passes.                                    |
+| `ux validate`    | Validate shared UX contracts and agent metadata alignment.                             |
+| `help`           | Show command help in human-readable or structured form.                                |
+
+## Common Operations
+
+Representative commands:
+
+```bash
+spec-forge-cli apply --target . --spec-id demo --stage intake --parameter problem_goal --value '"Ship the workflow"'
+spec-forge-cli focus --target . --spec-id demo --stage journeys --write
+spec-forge-cli artifact get --target . --spec-id demo --file framing/request-context.yaml
+spec-forge-cli artifact put --target . --spec-id demo --file journeys/journey-alpha.yaml --value '{}'
+spec-forge-cli artifact merge --target . --spec-id demo --file framing/request-context.yaml --value '{problem:{goal:"Ship the native CLI"}}'
+spec-forge-cli approve --target . --spec-id demo --file architecture/solution-outline.yaml --note 'Approved after review.'
+spec-forge-cli gate check --target . --spec-id demo --stage intake --write
+spec-forge-cli stage advance --target . --spec-id demo --stage intake
+```
+
+## Output Formats
+
+Structured commands support:
+
+- `--format yaml`
+- `--format json`
+- `--format toml`
+
+Use `--help` for terminal help text, or `spec-forge-cli help <command> --format json` when you need machine-readable command metadata.
+
+Example:
+
+```bash
+spec-forge-cli help gate check --format json
+```
+
 ## Validation
+
+Run these validation commands from the repository root.
 
 ```bash
 cargo test --manifest-path spec-forge-cli/Cargo.toml
 cargo fmt --manifest-path spec-forge-cli/Cargo.toml --check
 cargo clippy --manifest-path spec-forge-cli/Cargo.toml -- -D warnings
 cargo package --manifest-path spec-forge-cli/Cargo.toml --offline
+spec-forge-cli ux validate --target .
 ```
 
-## License
+## Release Rehearsal And Recovery
 
-MIT
+Use the release harness only when preparing packages or verifying the release path.
+Run the release-harness commands in this section from `spec-forge-cli/`.
+
+Run a dry packaging rehearsal before a real release:
+
+```bash
+npm ci
+npm run release:rehearse
+```
+
+Prepare release assets and npm prerequisites before the first production publish:
+
+```bash
+npm run release:prepublish
+```
+
+Recovery entry points:
+
+- If the rehearsal fails because dependencies or auth are missing, fix the environment and rerun `npm ci` and `npm run release:rehearse`.
+- If a CI release is wedged after a tag already exists, rerun the `Release` GitHub Actions workflow with the required `recover-version` input and the optional `recover-run-id` input when you need to reuse the original build artifacts.
+- If you need a local install from an already released tag, rerun `./scripts/install-current-release.sh` from `spec-forge-cli/`.
+
+> [!NOTE]
+> `release:rehearse` validates packaging without creating Git tags, GitHub Releases, or real npm publishes.

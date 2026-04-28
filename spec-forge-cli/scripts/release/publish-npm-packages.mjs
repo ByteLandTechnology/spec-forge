@@ -29,6 +29,7 @@ if (!version) {
 const config = readReleaseConfig(rootDir);
 const platformsDir = path.join(rootDir, "npm/platforms");
 const mainPkgDir = path.join(rootDir, "npm/main");
+const RECOVERY_DIST_TAG = "recovery";
 
 // Track skipped steps for receipt generation.
 const skippedSteps = [];
@@ -54,6 +55,84 @@ function alreadyPublished(pkgName, pkgVersion) {
   );
 }
 
+function parseSemver(value) {
+  const match = /^(?<major>0|[1-9]\d*)\.(?<minor>0|[1-9]\d*)\.(?<patch>0|[1-9]\d*)(?:-(?<prerelease>[0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?$/.exec(
+    value,
+  );
+  if (!match?.groups) {
+    throw new Error(`Unsupported semver version: ${JSON.stringify(value)}`);
+  }
+  return {
+    major: Number(match.groups.major),
+    minor: Number(match.groups.minor),
+    patch: Number(match.groups.patch),
+    prerelease: match.groups.prerelease
+      ? match.groups.prerelease.split(".")
+      : [],
+  };
+}
+
+function compareSemver(a, b) {
+  const left = parseSemver(a);
+  const right = parseSemver(b);
+  for (const key of ["major", "minor", "patch"]) {
+    if (left[key] !== right[key]) {
+      return left[key] < right[key] ? -1 : 1;
+    }
+  }
+
+  if (left.prerelease.length === 0 && right.prerelease.length === 0) return 0;
+  if (left.prerelease.length === 0) return 1;
+  if (right.prerelease.length === 0) return -1;
+
+  const count = Math.max(left.prerelease.length, right.prerelease.length);
+  for (let index = 0; index < count; index += 1) {
+    const l = left.prerelease[index];
+    const r = right.prerelease[index];
+    if (l === undefined) return -1;
+    if (r === undefined) return 1;
+    if (l === r) continue;
+
+    const lNumeric = /^\d+$/.test(l);
+    const rNumeric = /^\d+$/.test(r);
+    if (lNumeric && rNumeric) return Number(l) < Number(r) ? -1 : 1;
+    if (lNumeric) return -1;
+    if (rNumeric) return 1;
+    return l < r ? -1 : 1;
+  }
+  return 0;
+}
+
+function readLatestDistTag(pkgName) {
+  const r = spawnSync("npm", ["view", pkgName, "dist-tags", "--json"], {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  if (r.status === 0) {
+    const distTags = JSON.parse(r.stdout || "{}");
+    return typeof distTags.latest === "string" ? distTags.latest.trim() : null;
+  }
+
+  const stderr = (r.stderr ?? "").toLowerCase();
+  const notFound =
+    stderr.includes("e404") ||
+    stderr.includes("etarget") ||
+    stderr.includes("not found");
+  if (notFound) return null;
+
+  throw new Error(
+    `npm view ${pkgName} dist-tags failed with unexpected error:\n${r.stderr?.trim() ?? "(no stderr)"}`,
+  );
+}
+
+function resolvePublishTag(pkgName, pkgVersion) {
+  const latestVersion = readLatestDistTag(pkgName);
+  if (!latestVersion) return null;
+  return compareSemver(pkgVersion, latestVersion) < 0
+    ? RECOVERY_DIST_TAG
+    : null;
+}
+
 function publishPackage(pkgDir, label) {
   const pkgName = JSON.parse(
     readFileSync(path.join(pkgDir, "package.json"), "utf8"),
@@ -69,14 +148,19 @@ function publishPackage(pkgDir, label) {
     return "skipped";
   }
 
-  const result = spawnSync(
-    "npm",
-    ["publish", "--access=public", "--provenance"],
-    {
-      cwd: pkgDir,
-      stdio: "inherit",
-    },
-  );
+  const publishTag = resolvePublishTag(pkgName, version);
+  const publishArgs = ["publish", "--access=public", "--provenance"];
+  if (publishTag) {
+    publishArgs.push("--tag", publishTag);
+    console.log(
+      `publish ${label} ${pkgName}@${version} with dist-tag ${publishTag} (latest is newer)`,
+    );
+  }
+
+  const result = spawnSync("npm", publishArgs, {
+    cwd: pkgDir,
+    stdio: "inherit",
+  });
   if (result.status !== 0) {
     throw new Error(
       `npm publish failed for ${pkgName}@${version} (exit ${result.status}).`,

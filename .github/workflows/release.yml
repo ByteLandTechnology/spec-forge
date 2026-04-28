@@ -190,23 +190,37 @@ jobs:
           echo "recovery_version: \"${version}\"" >> ../.cli-forge/release-receipt.yml
           if [[ -z "${{ inputs['recover-run-id'] }}" ]]; then
             if gh release view "v${version}" --json assets -q '.assets | length' 2>/dev/null | grep -qv '^0$'; then
-              echo "::error::GitHub Release v${version} already has assets. Provide recover-run-id to reuse original artifacts." >&2
-              exit 1
+              echo "::notice::GitHub Release v${version} already has assets. Recovery will reuse them and only upload missing files."
             fi
             node --input-type=module -e "
               import { spawnSync } from 'node:child_process';
               import { buildAllPackageNames, readReleaseConfig } from './scripts/release/release-config.mjs';
               const v = '${version}';
               const names = buildAllPackageNames(readReleaseConfig(process.cwd()));
+              const already = [];
+              const missing = [];
               for (const name of names) {
                 const r = spawnSync('npm', ['view', name + '@' + v, 'version'], { encoding: 'utf8', stdio: 'pipe' });
                 if (r.status === 0) {
-                  console.error(name + '@' + v + ' already published. Provide recover-run-id to reuse original artifacts.');
-                  process.exit(1);
+                  if (r.stdout.trim() === v) {
+                    already.push(name + '@' + v);
+                    continue;
+                  }
                 }
                 const stderr = (r.stderr ?? '').toLowerCase();
                 const notFound = stderr.includes('e404') || stderr.includes('etarget') || stderr.includes('not found');
-                if (!notFound) throw new Error('npm view ' + name + '@' + v + ' failed: ' + (r.stderr ?? '').trim());
+                if (r.status !== 0) {
+                  if (!notFound) throw new Error('npm view ' + name + '@' + v + ' failed: ' + (r.stderr ?? '').trim());
+                  missing.push(name + '@' + v);
+                  continue;
+                }
+                missing.push(name + '@' + v);
+              }
+              if (already.length > 0) {
+                console.log('Recovery preflight: already published npm packages: ' + already.join(', '));
+              }
+              if (missing.length > 0) {
+                console.log('Recovery preflight: missing npm packages: ' + missing.join(', '));
               }
             "
           fi
